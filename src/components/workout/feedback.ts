@@ -31,8 +31,3 @@ export function buzz(pattern: number | number[] = 60) {
     // vibration is optional
   }
 }
-
-/** Keeps the screen awake during a workout where supported. */
-export function useWakeLockEffect(active: boolean) {
-  return { active };
-}

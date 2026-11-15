@@ -25,6 +25,7 @@ import {
   violatesLimits,
   stressLimits,
   type EngineSnapshot,
+  type PainReport,
   type WorkoutFeedback,
   type WorkoutStep,
 } from "@/engine";
@@ -203,7 +204,7 @@ export function WorkoutRunner({ data, initial }: { data: AppData; initial: Activ
     toast(`Swapped to ${nx.name}`);
   };
 
-  const onPainSaved = (area: string) => {
+  const onPainSaved = (report: PainReport) => {
     if (!step) return;
     const key = itemKey(step);
     const log = a.logs[key];
@@ -211,7 +212,7 @@ export function WorkoutRunner({ data, initial }: { data: AppData; initial: Activ
     // Skip every remaining exercise that loads the painful area.
     const limits = stressLimits(snap.profile, [
       ...snap.pain,
-      { id: "tmp", createdAt: "", date: "", area: area as never, severity: 5, quality: "unsure", context: "workout", status: "active", updatedAt: "", followUps: [] },
+      report,
     ]);
     const toSkip = new Set<string>();
     steps.forEach((s, i) => {
@@ -400,7 +401,7 @@ export function WorkoutRunner({ data, initial }: { data: AppData; initial: Activ
         context="workout"
         exerciseId={ex.id}
         sessionId={a.sessionId}
-        onSaved={(r) => onPainSaved(r.area)}
+        onSaved={onPainSaved}
         onRedFlag={async () => {
           await reportRedFlag();
           router.replace("/");

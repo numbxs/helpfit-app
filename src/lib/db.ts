@@ -1,4 +1,5 @@
 import Dexie, { type Table } from "dexie";
+import { dayKey, weekStartFor } from "@/engine/dates";
 import type {
   Adaptation,
   DayState,
@@ -195,7 +196,14 @@ export async function readAll(): Promise<AppData> {
         d.measurements.orderBy("date").toArray(),
         d.activeWorkout.get("current"),
       ]);
-    const plan = plans.at(-1) ?? null;
+    // The current week's plan (week start can change in settings, so don't rely on sort order).
+    const today = dayKey(new Date());
+    const currentStart = profile ? weekStartFor(today, profile.weekStartsOn) : null;
+    const plan =
+      plans.find((p) => p.weekStart === currentStart) ??
+      [...plans].reverse().find((p) => p.weekStart <= today && today <= p.weekEnd) ??
+      plans.at(-1) ??
+      null;
     const snapshot: EngineSnapshot | null = profile
       ? {
           profile,

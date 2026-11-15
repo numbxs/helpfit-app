@@ -28,11 +28,6 @@ export function useNow(ms = 30_000): Date {
   return now;
 }
 
-/** Changes only when the calendar day changes (keeps memoised engine output stable). */
-export function useToday(now: Date): string {
-  return dayKey(now);
-}
-
 export function useRecommendation(data: AppData | undefined, now: Date): Recommendation | null {
   const minute = Math.floor(now.getTime() / 60_000);
   return useMemo(

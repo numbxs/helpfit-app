@@ -2,7 +2,7 @@ import { addDays, dayKey, timeOfDay } from "./dates";
 import { EXERCISE_BY_ID } from "./exercises/library";
 import { countsTowardWeek } from "./planner";
 import { FOCUS_LABEL, type Recommendation } from "./recommender";
-import { activePain, AREA_LABEL } from "./safety";
+import { activePain } from "./safety";
 import type { StatsSummary } from "./stats";
 import type { Barrier, EngineSnapshot, Focus, TimeOfDay, Variant } from "./types";
 
@@ -322,8 +322,4 @@ export function localCoachReply(message: string, ctx: CoachContext): CoachReply 
       { label: "Something different", actions: [{ type: "set_focus", focus: ctx.today.focus === "cardio" ? "mobility" : "cardio" }] },
     ],
   );
-}
-
-export function painSummary(snap: EngineSnapshot): string[] {
-  return activePain(snap.pain).map((p) => `${AREA_LABEL[p.area]} (${p.severity}/10)`);
 }

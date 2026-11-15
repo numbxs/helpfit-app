@@ -3,7 +3,6 @@
 import {
   applySessionProgression,
   buildReflection,
-  countsTowardWeek,
   dayKey,
   detectInsights,
   EXERCISE_BY_ID,
@@ -24,7 +23,6 @@ import {
   type DayState,
   type EngineSnapshot,
   type Equipment,
-  type ExerciseLog,
   type ExternalActivity,
   type Experience,
   type Goal,
@@ -303,7 +301,8 @@ export async function applyCoachActions(actions: CoachAction[], rec: Recommendat
         await patchDayState({ intensity: Math.max(-2, Math.min(2, (cur.intensity ?? 0) + a.delta)) }, now);
         break;
       case "set_focus":
-        await patchDayState({ focus: a.focus, notToday: undefined }, now);
+        if (cur.notToday) await undoNotToday(now);
+        await patchDayState({ focus: a.focus }, now);
         break;
       case "change_format":
         await patchDayState({ shuffle: (cur.shuffle ?? 0) + 1, focus: cur.focus ?? rec?.focus }, now);
@@ -707,16 +706,4 @@ export async function markProposalApplied(messageId: string, index: number, now 
 
 export async function clearCoachHistory(): Promise<void> {
   await db().coachMessages.clear();
-}
-
-// ---------------------------------------------------------------------------
-// Helpers used by the workout screen
-// ---------------------------------------------------------------------------
-
-export function emptyLog(exerciseId: string, role: ExerciseLog["role"], prescribed: ExerciseLog["prescribed"]): ExerciseLog {
-  return { exerciseId, role, prescribed, sets: [] };
-}
-
-export function weekDoneCount(sessions: SessionLog[], weekStart: string, weekEnd: string): number {
-  return sessions.filter((s) => s.date >= weekStart && s.date <= weekEnd && countsTowardWeek(s)).length;
 }

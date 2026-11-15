@@ -46,7 +46,7 @@ export function detectInsights(input: InsightInput): Insight[] {
   const drafts: Draft[] = [];
 
   // 1. Duration preference
-  const byVariant = completionByVariant(recentSessions, recentDays, recentSkips);
+  const byVariant = completionByVariant(recentSessions, recentDays, recentSkips, today);
   const full = byVariant.full;
   const shortN = byVariant.quick.attempts + byVariant.minimum.attempts;
   const shortDone = byVariant.quick.completed + byVariant.minimum.completed;

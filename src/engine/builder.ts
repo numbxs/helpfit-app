@@ -1,4 +1,4 @@
-import { addDays, hash } from "./dates";
+import { hash } from "./dates";
 import { EXERCISES, EXERCISE_BY_ID } from "./exercises/library";
 import {
   buildSelectionContext,
@@ -815,6 +815,3 @@ function fitToWindow(blocks: DraftBlock[], variant: Variant) {
     } else break;
   }
 }
-
-/** Day after `date` helper used by tests and callers. */
-export const nextDay = (date: string) => addDays(date, 1);

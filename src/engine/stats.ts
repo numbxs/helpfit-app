@@ -141,7 +141,7 @@ function rate(attempts: number, completed: number): RateStat {
 }
 
 /** Completion rate for each duration variant: started or recommended-but-skipped days count as attempts. */
-export function completionByVariant(sessions: SessionLog[], dayStates: DayState[], skips: SkipEvent[]): Record<Variant, RateStat> {
+export function completionByVariant(sessions: SessionLog[], dayStates: DayState[], skips: SkipEvent[], today?: string): Record<Variant, RateStat> {
   const out = {} as Record<Variant, RateStat>;
   const guided = sessions.filter((s) => s.source === "guided" && s.status !== "in_progress");
   for (const v of ["minimum", "quick", "full"] as Variant[]) {
@@ -149,7 +149,7 @@ export function completionByVariant(sessions: SessionLog[], dayStates: DayState[
     const completed = started.filter((s) => s.status === "completed").length;
     // Days this variant was recommended and nothing happened at all.
     const ignored = dayStates.filter(
-      (d) => d.shown?.variant === v && !d.variant && !sessions.some((s) => s.date === d.date && s.status !== "in_progress"),
+      (d) => d.date !== today && d.shown?.variant === v && !d.variant && !sessions.some((s) => s.date === d.date && s.status !== "in_progress"),
     ).length;
     const skipped = skips.filter((k) => k.variant === v && k.reason !== "rest").length;
     out[v] = rate(started.length + ignored + skipped, completed);
@@ -290,7 +290,7 @@ export function computeStats(input: StatsInput): StatsSummary {
     totalMinutes,
     averageMinutes: done.length ? Math.round(totalMinutes / done.length) : null,
     returns: returnsAfterGaps(input.sessions),
-    byVariant: completionByVariant(input.sessions, input.dayStates, input.skips),
+    byVariant: completionByVariant(input.sessions, input.dayStates, input.skips, today),
     byTime: completionByTime(input.sessions, input.skips),
     byWeekday: completionByWeekday(input.sessions),
     barriers: barrierCounts(input.skips, addDays(today, -56)),
