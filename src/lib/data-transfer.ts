@@ -27,6 +27,9 @@ const KEY_FIELD: Record<TableName, string> = {
   activeWorkout: "id",
   reminderQueue: "tag",
   meta: "key",
+  mindProfile: "id",
+  mindSessions: "id",
+  mindState: "id",
 };
 
 const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);

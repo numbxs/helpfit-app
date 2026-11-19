@@ -18,7 +18,9 @@ export type CoachAction =
   | { type: "change_format" }
   | { type: "not_today"; reason: Barrier | "rest" }
   | { type: "report_pain" }
-  | { type: "reset_today" };
+  | { type: "reset_today" }
+  /** Opens a mind practice (mindfulness, breathing, drill or focus block). */
+  | { type: "start_practice"; practiceId: string; minutes: number };
 
 export interface CoachProposal {
   label: string;
@@ -63,6 +65,7 @@ export interface CoachContext {
   };
   progress: { adherence4Weeks: number | null; totalSessions: number; milestones: string[]; strength: { exercise: string; current: string }[] };
   learned: { statement: string; status: string }[];
+  mind?: { focusSpanMinutes: number | null; practiceDays7: number; recent: string[]; goals: string[] };
 }
 
 export function buildCoachContext(
@@ -70,7 +73,7 @@ export function buildCoachContext(
   rec: Recommendation,
   stats: StatsSummary,
   now: Date,
-  opts: { includeHealth: boolean },
+  opts: { includeHealth: boolean; mind?: CoachContext["mind"] },
 ): CoachContext {
   const today = dayKey(now);
   const plan = snap.plan;
@@ -146,6 +149,7 @@ export function buildCoachContext(
     },
     learned: snap.insights.filter((i) => i.status !== "rejected").map((i) => ({ statement: i.statement, status: i.status })),
   };
+  if (opts.mind) ctx.mind = opts.mind;
   if (opts.includeHealth) {
     ctx.health = {
       cautionAreas: p.cautionAreas,
@@ -178,6 +182,10 @@ const BUSY = /\b(busy|no time|short on time|swamped|slammed|only have|quick one)
 const MOTIVATION = /unmotivated|no motivation|don'?t feel like|can'?t be bothered|lazy|not in the mood|meh/i;
 const PLAN = /this week|my plan|schedule|what'?s (next|planned)|week look/i;
 const MINUTES = /(\d{1,2})\s*(?:min|mins|minutes|m\b)/i;
+const FOCUS_TROUBLE = /can'?t (focus|concentrate)|distract|scattered|attention span|brain ?fog|procrastinat|keep checking (my )?phone|doom ?scroll|lost (my )?focus|focus/i;
+const STRESS = /stress|anxious|anxiety|overwhelm|racing (mind|thoughts)|on edge|wound up|tense|panic/i;
+const SLEEP = /can'?t sleep|sleep|wind ?down|insomnia|switch off/i;
+const MIND_WORDS = /meditat|mindful|breath(ing)? (exercise|practice)|calm down/i;
 
 export function localCoachReply(message: string, ctx: CoachContext): CoachReply {
   const m = message.trim();
@@ -222,6 +230,43 @@ export function localCoachReply(message: string, ctx: CoachContext): CoachReply 
         { label: "Take today off", actions: [{ type: "not_today", reason: "rest" }] },
       ],
     );
+  }
+
+  if (STRESS.test(m)) {
+    return reply(
+      "Let's downshift first. Long exhales or cyclic sighing calm the stress response within a few minutes — then decide about training. If stress or anxiety is persistent or overwhelming, it's worth talking to a professional.",
+      [
+        { label: "Cyclic sighing · 2 min", actions: [{ type: "start_practice", practiceId: "cyclic_sigh", minutes: 2 }] },
+        { label: "Long exhale · 5 min", actions: [{ type: "start_practice", practiceId: "extended_exhale", minutes: 5 }] },
+        { label: "Make today's workout easier", actions: [{ type: "adjust_intensity", delta: -1 }] },
+      ],
+    );
+  }
+
+  if (FOCUS_TROUBLE.test(m) && !/workout|exercise|training/i.test(m)) {
+    const span = ctx.mind?.focusSpanMinutes;
+    return reply(
+      `Focus comes back through practice on real work. Start a ${span ?? 20}-minute focus block on one specific task, phone out of reach — each time you notice a distraction, tap it and return; that's the rep. If the urge to check your phone is strong right now, ride it out first.${ctx.mind ? "" : " (Set up Mind training once to track your focus span.)"}`,
+      [
+        { label: `Focus block · ${span ?? 20} min`, actions: [{ type: "start_practice", practiceId: "focus_block", minutes: span ?? 20 }] },
+        { label: "Urge surfing · 3 min", actions: [{ type: "start_practice", practiceId: "urge_surfing", minutes: 3 }] },
+        { label: "Breath anchor · 5 min", actions: [{ type: "start_practice", practiceId: "breath_anchor", minutes: 5 }] },
+      ],
+    );
+  }
+
+  if (SLEEP.test(m)) {
+    return reply("For winding down: a body scan or long exhales in the evening, and keep hard workouts earlier in the day. If sleep problems persist for weeks, talk to a doctor.", [
+      { label: "Body scan · 10 min", actions: [{ type: "start_practice", practiceId: "body_scan", minutes: 10 }] },
+      { label: "Long exhale · 5 min", actions: [{ type: "start_practice", practiceId: "extended_exhale", minutes: 5 }] },
+    ]);
+  }
+
+  if (MIND_WORDS.test(m)) {
+    return reply("A short daily practice beats an occasional long one. Breath anchor is the core attention workout; breath counting lets you measure it.", [
+      { label: "Breath anchor · 5 min", actions: [{ type: "start_practice", practiceId: "breath_anchor", minutes: 5 }] },
+      { label: "Breath counting · 5 min", actions: [{ type: "start_practice", practiceId: "breath_counting", minutes: 5 }] },
+    ]);
   }
 
   if (TIRED.test(m) || (minutes !== null && minutes <= 12 && (BUSY.test(m) || TIRED.test(m)))) {

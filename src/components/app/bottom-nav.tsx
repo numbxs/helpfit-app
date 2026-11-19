@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, MessageCircle, Sun, TrendingUp, UserRound } from "lucide-react";
+import { Brain, CalendarDays, MessageCircle, Sun, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/", label: "Today", icon: Sun },
   { href: "/plan", label: "Plan", icon: CalendarDays },
+  { href: "/mind", label: "Mind", icon: Brain },
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/coach", label: "Coach", icon: MessageCircle },
-  { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
 export function BottomNav() {

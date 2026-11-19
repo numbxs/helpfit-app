@@ -18,6 +18,9 @@ import type {
   WeekPlan,
   WeeklyReflection,
   Workout,
+  MindProfile,
+  MindSessionLog,
+  MindState,
 } from "@/engine";
 
 /**
@@ -98,6 +101,9 @@ export class HelpFitDB extends Dexie {
   activeWorkout!: Table<ActiveWorkout, string>;
   reminderQueue!: Table<QueuedReminder, string>;
   meta!: Table<Meta, string>;
+  mindProfile!: Table<MindProfile, string>;
+  mindSessions!: Table<MindSessionLog, string>;
+  mindState!: Table<MindState, string>;
 
   constructor() {
     super("helpfit");
@@ -120,6 +126,12 @@ export class HelpFitDB extends Dexie {
       activeWorkout: "id",
       reminderQueue: "tag, fireAt",
       meta: "key",
+    });
+    // v2: mind training (existing tables are kept as-is).
+    this.version(2).stores({
+      mindProfile: "id",
+      mindSessions: "id, date, practiceId",
+      mindState: "id",
     });
   }
 }
@@ -151,6 +163,9 @@ export const ALL_TABLES = [
   "activeWorkout",
   "reminderQueue",
   "meta",
+  "mindProfile",
+  "mindSessions",
+  "mindState",
 ] as const;
 
 export type TableName = (typeof ALL_TABLES)[number];
@@ -172,12 +187,18 @@ export interface AppData {
   reflections: WeeklyReflection[];
   measurements: Measurement[];
   activeWorkout: ActiveWorkout | null;
+  mind: {
+    profile: MindProfile | null;
+    state: MindState | null;
+    sessions: MindSessionLog[];
+  };
 }
 
 /** Reads everything the engine needs. Data volumes are small (personal use). */
 export async function readAll(): Promise<AppData> {
   const d = db();
   return d.transaction("r", d.tables, async () => {
+    const [mindProfile, mindState, mindSessions] = await Promise.all([d.mindProfile.get("mind"), d.mindState.get("mind-state"), d.mindSessions.orderBy("date").toArray()]);
     const [profile, settings, sessions, skips, pain, states, choices, plans, insights, adaptation, dayStates, events, reflections, measurements, active] =
       await Promise.all([
         d.profile.get("me"),
@@ -226,6 +247,11 @@ export async function readAll(): Promise<AppData> {
       reflections: reflections.sort((a, b) => b.weekStart.localeCompare(a.weekStart)),
       measurements,
       activeWorkout: active ?? null,
+      mind: {
+        profile: mindProfile ?? null,
+        state: mindState ?? null,
+        sessions: mindSessions.sort((a, b) => a.startedAt.localeCompare(b.startedAt)),
+      },
     };
   });
 }

@@ -25,6 +25,27 @@ export const coachActionSchema = z.discriminatedUnion("type", [
   }),
   z.object({ type: z.literal("report_pain") }),
   z.object({ type: z.literal("reset_today") }),
+  z.object({
+    type: z.literal("start_practice"),
+    practiceId: z.enum([
+      "breath_anchor",
+      "breath_counting",
+      "noting",
+      "body_scan",
+      "breathing_space",
+      "urge_surfing",
+      "mindful_walk",
+      "box_breathing_mind",
+      "extended_exhale",
+      "cyclic_sigh",
+      "sart",
+      "flanker",
+      "nback",
+      "schulte",
+      "focus_block",
+    ]),
+    minutes: z.number().int().min(1).max(90),
+  }),
 ]);
 
 export const coachProposalSchema = z.object({

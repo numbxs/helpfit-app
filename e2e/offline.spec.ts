@@ -12,18 +12,19 @@ test("offline: the installed app keeps working without a network", async ({ page
   await page.waitForFunction(async () => {
     const shell = (await caches.keys()).find((k) => k.startsWith("helpfit-shell-"));
     if (!shell) return false;
-    return (await (await caches.open(shell)).keys()).length >= 7;
+    return (await (await caches.open(shell)).keys()).length >= 9;
   });
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole("button", { name: "Start workout" })).toBeVisible();
   for (const [tab, heading] of [
     ["Plan", "This week"],
+    ["Mind", "Mind"],
     ["Progress", "Progress"],
-    ["Profile", "Profile"],
+    ["Profile and settings", "Profile"],
     ["Today", /Good|Late/],
   ] as const) {
-    await page.getByRole("link", { name: tab, exact: true }).click();
+    await page.getByRole("link", { name: tab, exact: true }).first().click();
     await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
   }
   // A full workout, logged offline.

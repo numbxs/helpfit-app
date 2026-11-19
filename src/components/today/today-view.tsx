@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HeartPulse, Minus, Plus, RotateCcw, Shuffle, Trophy, X } from "lucide-react";
 import { useData } from "@/components/app/data-context";
+import { ProfileLink } from "@/components/app/page-header";
 import { ProgressRing } from "@/components/kit/bits";
 import { ActivitySheet } from "@/components/shared/activity-sheet";
 import { HowToSheet, ReplaceSheet } from "@/components/shared/exercise-sheets";
@@ -16,6 +17,7 @@ import { CheckIn } from "./check-in";
 import { PainNotice, ProposalCard, ReflectionCard, ResumeBanner, StateCard } from "./cards";
 import { ExerciseList } from "./exercise-list";
 import { WorkoutHero } from "./hero";
+import { MindCard } from "./mind-card";
 import { NotTodaySheet } from "./not-today-sheet";
 
 function greeting(d: Date) {
@@ -73,7 +75,7 @@ export function TodayView() {
 
   return (
     <div className="space-y-4 pb-4">
-      <header className="flex items-end justify-between gap-4 pb-1 pt-6">
+      <header className="flex items-end justify-between gap-2 pb-1 pt-6">
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-muted-foreground">{dateLabel}</p>
           <h1 className="mt-0.5 text-[28px] font-semibold leading-tight tracking-[-0.02em]">{greeting(now)}</h1>
@@ -89,6 +91,7 @@ export function TodayView() {
             {rec.week.done >= rec.week.target ? <Trophy className="size-4 text-chart-1" /> : null}
           </ProgressRing>
         </Link>
+        <ProfileLink className="mb-1" />
       </header>
 
       {data.activeWorkout && <ResumeBanner title={data.activeWorkout.workout.title} />}
@@ -157,6 +160,8 @@ export function TodayView() {
           onUndo={rec.kind === "not_today" ? () => undoNotToday() : undefined}
         />
       )}
+
+      <MindCard now={now} feeling={ds?.feeling} trainedToday={snap.sessions.some((s) => s.date === rec.date && s.source === "guided" && (s.status === "completed" || s.status === "partial"))} />
 
       <div className="grid grid-cols-2 gap-2 pt-2">
         <button type="button" onClick={() => setActivity(true)} className="flex min-h-14 items-center gap-2 rounded-2xl border bg-card px-4 text-left text-sm font-semibold transition hover:border-foreground/30">

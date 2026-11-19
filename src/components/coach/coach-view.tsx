@@ -19,6 +19,7 @@ import { applyCoachActions, clearCoachHistory, markProposalApplied, reportRedFla
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
+  "I can't focus today",
   "I have 10 minutes and I'm exhausted",
   "I haven't exercised for a week",
   "I'm getting bored with this routine",
@@ -75,6 +76,12 @@ export function CoachView() {
     const actions = p.actions.map((a) => coachActionSchema.safeParse(a)).filter((r) => r.success).map((r) => r.data as CoachAction);
     if (actions.some((a) => a.type === "report_pain")) {
       setPainOpen(true);
+      return;
+    }
+    const practice = actions.find((a) => a.type === "start_practice");
+    if (practice && practice.type === "start_practice") {
+      await markProposalApplied(msg.id, index);
+      router.push(`/practice?p=${practice.practiceId}&m=${practice.minutes}`);
       return;
     }
     await applyCoachActions(actions, rec);

@@ -13,3 +13,4 @@ export * from "./recommender";
 export * from "./reflection";
 export * from "./reminders";
 export * from "./coach";
+export * from "./mind";

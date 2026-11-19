@@ -1,6 +1,6 @@
 "use client";
 
-import { buildCoachContext, localCoachReply, type CoachReply, type Recommendation, type StatsSummary } from "@/engine";
+import { buildCoachContext, dayKey, localCoachReply, MIND_PRACTICE_BY_ID, type CoachReply, type Recommendation, type StatsSummary } from "@/engine";
 import type { AppData, CoachMessage } from "./db";
 import { coachResponseSchema } from "./coach-schema";
 
@@ -32,7 +32,20 @@ export interface AskResult extends CoachReply {
 export async function askCoach(message: string, history: CoachMessage[], data: AppData, rec: Recommendation, stats: StatsSummary): Promise<AskResult> {
   const snap = data.snapshot!;
   const { ai } = data.settings;
-  const ctx = buildCoachContext(snap, rec, stats, new Date(), { includeHealth: ai.shareHealth });
+  const since = new Date();
+  since.setDate(since.getDate() - 6);
+  const recentMind = data.mind.sessions.filter((s) => s.date >= dayKey(since));
+  const ctx = buildCoachContext(snap, rec, stats, new Date(), {
+    includeHealth: ai.shareHealth,
+    mind: data.mind.profile
+      ? {
+          focusSpanMinutes: data.mind.state?.focusTargetMinutes ?? null,
+          practiceDays7: new Set(recentMind.map((s) => s.date)).size,
+          recent: recentMind.slice(-6).map((s) => `${s.date}: ${MIND_PRACTICE_BY_ID[s.practiceId]?.name ?? s.practiceId} (${Math.round(s.actualMinutes)} min${s.completed ? "" : ", partial"})`),
+          goals: data.mind.profile.goals,
+        }
+      : undefined,
+  });
   const local = localCoachReply(message, ctx);
   if (!ai.enabled || !ai.shareTraining) return local;
 

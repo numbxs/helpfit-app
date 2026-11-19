@@ -61,7 +61,9 @@ Hard rules:
 - Consistency beats intensity. A completed 5-minute session beats a skipped 30-minute one. After missed days, recommend an easy restart and never ask the user to make up sessions.
 - Keep replies short: usually 1–3 sentences, plain text, no headings or lists unless asked.
 
-Session vocabulary: variants are minimum (5 min), quick (15 min) and full (30 min). Focus types are strength, cardio, mobility, recovery and restart.`;
+Session vocabulary: variants are minimum (5 min), quick (15 min) and full (30 min). Focus types are strength, cardio, mobility, recovery and restart.
+
+Mind training (the "mind" field in the data, when present): focus blocks on real work (the user's current focus span grows by 5 minutes after two clean blocks), mindfulness (breath_anchor, breath_counting, noting, body_scan, breathing_space, urge_surfing, mindful_walk), breathing (box_breathing_mind, extended_exhale, cyclic_sigh) and attention/memory drills (sart, flanker, nback, schulte). Be honest that brain-training drills mostly improve the trained task; real-world focus improves most with focus blocks, mindfulness, exercise and sleep. Never present mind practices as treatment for ADHD, anxiety or depression; suggest professional help for severe or persistent problems.`;
 
 const TOOL: Anthropic.Beta.BetaTool = {
   name: "propose_session_change",
@@ -79,13 +81,18 @@ const TOOL: Anthropic.Beta.BetaTool = {
           properties: {
             type: {
               type: "string",
-              enum: ["set_variant", "adjust_intensity", "set_focus", "change_format", "not_today", "report_pain", "reset_today"],
+              enum: ["set_variant", "adjust_intensity", "set_focus", "change_format", "not_today", "report_pain", "reset_today", "start_practice"],
               description:
-                "set_variant: change length (needs variant). adjust_intensity: easier/harder (needs delta). set_focus: change session type (needs focus). change_format: same focus, new format and supporting exercises with progressions intact. not_today: take the day off (needs reason). report_pain: open the discomfort log. reset_today: undo today's changes.",
+                "set_variant: change length (needs variant). adjust_intensity: easier/harder (needs delta). set_focus: change session type (needs focus). change_format: same focus, new format and supporting exercises with progressions intact. not_today: take the day off (needs reason). report_pain: open the discomfort log. reset_today: undo today's changes. start_practice: open a mind practice (needs practiceId and minutes).",
             },
             variant: { type: "string", enum: ["minimum", "quick", "full"] },
             delta: { type: "integer", enum: [-1, 1] },
             focus: { type: "string", enum: ["strength", "cardio", "mobility", "recovery", "restart"] },
+            practiceId: {
+              type: "string",
+              enum: ["breath_anchor", "breath_counting", "noting", "body_scan", "breathing_space", "urge_surfing", "mindful_walk", "box_breathing_mind", "extended_exhale", "cyclic_sigh", "sart", "flanker", "nback", "schulte", "focus_block"],
+            },
+            minutes: { type: "integer", minimum: 1, maximum: 90 },
             reason: {
               type: "string",
               enum: ["rest", "no_time", "low_energy", "mental_fatigue", "motivation", "boredom", "forgot", "too_hard", "equipment_location", "pain_soreness", "unpredictable_schedule"],

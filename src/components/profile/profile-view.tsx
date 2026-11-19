@@ -62,6 +62,7 @@ import {
 } from "@/lib/labels";
 import { confirmClearance, deleteSession, setInsightStatus, updatePain, updateProfile, updateReadiness, updateSettings } from "@/lib/services";
 import { cn } from "@/lib/utils";
+import { MindSettingsSection } from "./mind-settings";
 
 type EditKey = null | "goals" | "level" | "place" | "likes" | "barriers" | "cautions" | "details" | "readiness";
 
@@ -75,7 +76,7 @@ export function ProfileView() {
 
   return (
     <div className="space-y-7 pb-4">
-      <PageHeader eyebrow={`Training since ${since}`} title="Profile" />
+      <PageHeader eyebrow={`Training since ${since}`} title="Profile" showProfile={false} />
 
       <section>
         <SectionTitle>Training</SectionTitle>
@@ -97,6 +98,7 @@ export function ProfileView() {
         </div>
       </section>
 
+      <MindSettingsSection />
       <HealthSection onEdit={setEdit} onReport={() => setPainOpen(true)} />
       <InsightsSection insights={snap.insights} />
       <RemindersSection />

@@ -14,6 +14,7 @@ import { FOCUS_NAME } from "@/lib/labels";
 import { addMeasurement, deleteMeasurement } from "@/lib/services";
 import { cn } from "@/lib/utils";
 import { ColumnChart, RateRow, Sparkline } from "./charts";
+import { MindProgress } from "./mind-progress";
 
 const shortDate = (d: string) => parseDay(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 const TIME_LABEL: Record<TimeOfDay, string> = { morning: "Morning", midday: "Midday", afternoon: "Afternoon", evening: "Evening" };
@@ -29,9 +30,12 @@ export function ProgressView() {
     return (
       <div className="pb-4">
         <PageHeader title="Progress" eyebrow="Real changes, not vanity metrics" />
-        <EmptyState title="Nothing to show yet">
+        <EmptyState title="No workouts yet">
           Finish your first session and this page starts tracking real changes — strength, consistency and what works for you. No made-up numbers.
         </EmptyState>
+        <div className="mt-7">
+          <MindProgress now={now} />
+        </div>
       </div>
     );
   }
@@ -125,6 +129,8 @@ export function ProgressView() {
           {cardioHistory.length === 0 && <p className="mt-2 text-xs text-muted-foreground">Cardio level rises after guided cardio sessions that feel manageable.</p>}
         </Surface>
       </section>
+
+      <MindProgress now={now} />
 
       <section>
         <SectionTitle>What works for you</SectionTitle>

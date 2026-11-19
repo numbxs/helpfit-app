@@ -13,6 +13,7 @@ A mobile-first, local-first Progressive Web App that behaves like a good persona
 | **Active workout** | One exercise at a time, big targets, rep/weight steppers, auto-running timers with lead-in, interval phases, rest timer (+15 s / skip), pause/resume, replace/skip/report pain mid-session, screen wake lock, sound/haptic cues, "That's your 5 minutes — keep going?", then 3-tap feedback and a summary of what progresses next time. Survives reloads. |
 | **Plan** | This week day by day, minimum / target / stretch, move sessions, adjust sessions-per-week and default length, export the week to your calendar (`.ics` with alarms), log football/hikes/runs (they fill cardio slots). |
 | **Progress** | Sessions, active minutes, 4-week consistency, comebacks after breaks, workouts per week vs target, per-pattern strength sparklines from logged reps, milestones, cardio minutes and level, follow-through by session length and time of day, barriers, enjoyment, often-skipped exercises, weekly reviews, optional body weight. No invented numbers. |
+| **Mind** | Attention and focus training. **Focus blocks** on real work (one task, phone away, tap "I got distracted" and return) with an adaptive focus span that grows 5 minutes after two clean blocks. **Mindfulness** (breath anchor, breath counting, noting, body scan, 3-step breathing space, urge surfing, mindful walk) with timed cues, optional voice guidance and bells. **Breathing** (box, long exhale, cyclic sighing) with an animated pacer. **Measured drills**: Steady tap (sustained attention, SART-style), Arrow focus (flanker interference), Memory track (adaptive n-back), Number grid (Schulte). A daily recommendation adapts to time of day, how you feel and what you've done; Progress shows real trends; the coach can hand you a practice. |
 | **Coach** | Works offline with no API key (rule-based, grounded in your data). Optional AI coach (Claude) behind a protected server endpoint, with separate consent for training data and health data. The coach can only *propose* changes; you confirm, the deterministic engine applies them. |
 | **Profile** | Goals, equipment, preferences, barriers, health screen & clearance, caution areas, discomfort log, **what the app has learned** (confirm / "not true"), reminders, AI consent, theme, training history, export / import / delete. |
 
@@ -36,7 +37,7 @@ Open it on your phone on the same network (`http://<your-computer-ip>:3000`) or 
 |---|---|
 | `npm run dev` | Dev server (Turbopack) |
 | `npm run build` / `npm start` | Production build / server |
-| `npm test` | Unit tests for the training engine (Vitest, 144 tests) |
+| `npm test` | Unit tests for the training and mind engines (Vitest, 195 tests) |
 | `npm run test:e2e` | End-to-end journeys in Chromium (Playwright; builds and starts the app on port 3100). Set `E2E_BASE_URL=http://localhost:3000 E2E_SKIP_OFFLINE=1` to run against a dev server. |
 | `npm run check` | Typecheck + lint + unit tests |
 
@@ -112,6 +113,11 @@ e2e/                   Playwright journeys, offline test, screenshot helper
 - **Missed days:** sessions reflow forward without stacking; when the week runs out, lower-priority sessions quietly drop. After 4+ quiet days (3 if restart friction is learned) Today switches to a gentle restart session; long gaps restart easier.
 - **Safety:** flagged health answers block structured workouts until the user confirms professional clearance. Active pain limits how much any exercise may load that area (mild → low stress only; moderate/sharp → none); past injuries exclude high-stress moves; lower-limb issues remove high impact. Severe, sharp, persistent, recurring or worsening pain → recommend professional assessment. Chest pain, dizziness, fainting or unusual breathlessness → stop, seek medical help, clearance required again.
 - **Learning:** shorter-vs-longer sessions, evening energy, best time window, outdoor vs indoor cardio enjoyment, restart friction, difficulty trends, boredom, repeatedly replaced exercises, enjoyed session types, frequent barriers. Each insight shows its evidence and its concrete effect; rejected insights are never applied.
+
+### Mind engine (`src/engine/mind/`)
+- Same rules as training: pure, deterministic (drills use a seeded generator), unit-tested.
+- Adaptive targets, one variable each: focus span ±5 min (two clean blocks up, two struggles down), breath-counting duration by accuracy, n-back level by block performance, number-grid size by speed.
+- Honest framing in the app: drills mostly improve the drilled skill; real-world focus improves most with focus blocks, mindfulness, exercise and sleep. Not a treatment for ADHD, anxiety or depression.
 
 ### Data & privacy
 - Stored locally in IndexedDB; nothing leaves the device unless you export it or opt in to the AI coach.

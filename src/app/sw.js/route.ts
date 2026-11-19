@@ -13,7 +13,7 @@
 
 export const dynamic = "force-static";
 
-const SHELL_ROUTES = ["/", "/plan", "/progress", "/coach", "/profile", "/onboarding", "/workout"];
+const SHELL_ROUTES = ["/", "/plan", "/mind", "/progress", "/coach", "/profile", "/onboarding", "/workout", "/practice"];
 
 function script(version: string): string {
   return `

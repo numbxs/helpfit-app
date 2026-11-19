@@ -314,7 +314,8 @@ export async function applyCoachActions(actions: CoachAction[], rec: Recommendat
         await resetToday(now);
         break;
       case "report_pain":
-        break; // handled by the UI (opens the discomfort sheet)
+      case "start_practice":
+        break; // handled by the UI (opens the discomfort sheet / the practice)
     }
   }
 }
